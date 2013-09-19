@@ -117,7 +117,7 @@ class u1Backup{
         $data = curl_exec($curl);
         curl_close($curl);
         
-        file_put_contents('/tmp/u1backup', $data);
+        file_put_contents($this->local . 'u1backup', $data);
         
         return $data;
     }
