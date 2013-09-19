@@ -30,3 +30,13 @@ What you need
 Besides setting things up in the script, you need PHP's OAuth.
 After you have it installed, remember that this script will run in CLI,
 which meand you need to enable OAuth in php.ini for CLI (it's a different file than Apache's).
+
+References
+----------
+
+Most of this code came from the web, so these are the sources:
+
+* [MySQL Dump](http://www.theblog.ca/mysql-email-backup "How to e-mail yourself an automatic backup of your MySQL database table with PHP")
+* [Ubuntu One Sync](http://askubuntu.com/questions/55032/how-to-create-a-new-file-with-content-using-ubuntu-one-api-and-php "How to create a new file with content using Ubuntu One API and PHP")
+* [Ubuntu One Sync 2](http://askubuntu.com/questions/54185/ubuntu-one-oauth-login-from-php "Ubuntu One Oauth login from PHP")
+* [Ubuntu One Authorisation](https://one.ubuntu.com/developer/account_admin/auth/otherplatforms "Authorisation - Other Platforms")
