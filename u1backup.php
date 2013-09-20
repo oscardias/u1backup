@@ -33,6 +33,9 @@ class u1Backup{
     var $local;
     var $remote;
     
+    /*
+     * Set database details
+     */
     public function setDatabase ($host, $user, $pass, $name)
     {
         $this->dbhost = $host;
@@ -41,18 +44,27 @@ class u1Backup{
         $this->dbname = $name;
     }
     
+    /*
+     * Set Ubuntu One credentials
+     */
     public function setUbuntuOne ($email, $pass)
     {
         $this->email = $email;
         $this->pass = $pass;
     }
     
+    /*
+     * Set local and Ubuntu One's path
+     */
     public function setPaths ($local, $remote)
     {
         $this->local = $local;
         $this->remote = $remote;
     }
     
+    /*
+     * Execution
+     */
     public function execute()
     {
         // Dump databases
@@ -62,6 +74,9 @@ class u1Backup{
         $this->syncFiles();
     }
     
+    /*
+     * MySQL Database dump
+     */
     public function dumpDatabase()
     {
         if(is_array($this->dbname)){
@@ -75,6 +90,9 @@ class u1Backup{
         }
     }
     
+    /*
+     * Sync files to Ubuntu One
+     */
     public function syncFiles()
     {
         $sso_notice = FALSE;
@@ -122,6 +140,9 @@ class u1Backup{
         }
     }
     
+    /*
+     * Athorize app with Ubuntu One
+     */
     private function _authorize()
     {
         $description = 'Ubuntu%20One%20@%20'.gethostname().'%20[u1Backup]';
@@ -140,6 +161,9 @@ class u1Backup{
         return $data;
     }
     
+    /*
+     * Dump specific database
+     */
     private function _dumpSingle($dbname)
     {
         $backupfile = $this->local . $dbname . date("N") . '.sql';
@@ -156,6 +180,9 @@ class u1Backup{
         gzclose($fp);
     }
     
+    /*
+     * Send single file to Ubuntu One
+     */
     private function _sendFile($oauth, $dbname, $encpath)
     {
         $backupfile = $this->local . $dbname . date("N") . '.gz';
