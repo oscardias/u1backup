@@ -33,7 +33,7 @@ $u1obj->setFolder('/var/www');
 // or $u1obj->setFolder(array('/var/www/site1', '/var/www/site2')); // Multiple folders
 
 // Local path for files (must have permission) and Ubuntu One path
-$u1obj->setPaths('/tmp/', '/~/Ubuntu One/backups');
+$u1obj->setWorkFolders('/tmp/', '/~/Ubuntu One/backups');
 
 // Your credentials for Ubuntu One
 $u1obj->setUbuntuOne('email', 'pass');
