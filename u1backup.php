@@ -1,6 +1,6 @@
 <?php
 /*
-u1backup v1.1.0
+u1backup v1.1.1
 Copyright (C) 2013  Oscar de Souza Dias
 
 This program is free software; you can redistribute it and/or modify
