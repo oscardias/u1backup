@@ -13,7 +13,8 @@ What it does
 ------------
 
 The class made available here will dump your MySQL databases (one or more) and save them into a folder
-(defined by you - test if the script can write to this folder).
+(defined by you - test if the script can write to this folder). From version 1.1, it also lets you
+backup directories.
 
 Next, it will connect to Ubuntu One using the credentials you provide.
 If it's the first time running the script, it will create a file named u1backup with the token

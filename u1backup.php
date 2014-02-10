@@ -1,6 +1,6 @@
 <?php
 /*
-u1backup v1.0.0
+u1backup v1.1.0
 Copyright (C) 2013  Oscar de Souza Dias
 
 This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,9 @@ class u1Backup{
     var $dbpass;
     var $dbname;
     
+    // Folder (or folders)
+    var $folder;
+    
     // Ubuntu one
     var $email;
     var $pass;
@@ -32,6 +35,9 @@ class u1Backup{
     // Paths
     var $local;
     var $remote;
+    
+    // Compressed files
+    var $zip_files;
     
     /*
      * Set database details
@@ -42,6 +48,14 @@ class u1Backup{
         $this->dbuser = $user;
         $this->dbpass = $pass;
         $this->dbname = $name;
+    }
+    
+    /*
+     * Set folder to be backuped
+     */
+    public function setFolder ($folder)
+    {
+        $this->folder = $folder;
     }
     
     /*
@@ -56,7 +70,7 @@ class u1Backup{
     /*
      * Set local and Ubuntu One's path
      */
-    public function setPaths ($local, $remote)
+    public function setWorkFolders ($local, $remote)
     {
         $this->local = $local;
         $this->remote = $remote;
@@ -67,8 +81,14 @@ class u1Backup{
      */
     public function execute()
     {
+        // Prepare array for zip files
+        $this->zip_files = array();
+        
         // Dump databases
         $this->dumpDatabase();
+        
+        // Compress folder
+        $this->compressFolder();
         
         // Sync to Ubuntu One
         $this->syncFiles();
@@ -90,6 +110,22 @@ class u1Backup{
         }
     }
     
+    /*
+     * 
+     */
+    public function compressFolder()
+    {
+        if(is_array($this->folder)) {
+            // Multiple folders
+            foreach ($this->folder as $folder) {
+                $this->_compressFolder($folder);
+            }
+        } else {
+            // One folder
+            $this->_compressFolder($this->folder);
+        }
+    }
+
     /*
      * Sync files to Ubuntu One
      */
@@ -129,14 +165,8 @@ class u1Backup{
         $encpath = str_replace("%2F", "/", $encpath);
 
         // Send files
-        if(is_array($this->dbname)){
-            // Multiple databases
-            foreach ($this->dbname as $value) {
-                $this->_sendFile($oauth, $value, $encpath);
-            }
-        } else {
-            // One database
-            $this->_sendFile($oauth, $this->dbname, $encpath);
+        foreach ($this->zip_files as $file) {
+            $this->_sendFile($oauth, $file, $encpath);
         }
     }
     
@@ -166,7 +196,8 @@ class u1Backup{
      */
     private function _dumpSingle($dbname)
     {
-        $backupfile = $this->local . $dbname . date("N") . '.sql';
+        $filename = $dbname . date("N") . '.sql';
+        $backupfile = $this->local . $filename;
         
         if($this->dbpass)
             system("mysqldump -h $this->dbhost -u $this->dbuser -p$this->dbpass $dbname > $backupfile");
@@ -174,21 +205,61 @@ class u1Backup{
             system("mysqldump -h $this->dbhost -u $this->dbuser $dbname > $backupfile");
         
         // Compress
-        $gzfile = $this->local . $dbname . date("N") . '.gz';
-        $fp = gzopen ($gzfile, 'w9'); // w9 == highest compression
-        gzwrite ($fp, file_get_contents($backupfile));
-        gzclose($fp);
+        $zip = new ZipArchive();
+        
+        $zipFilename = $this->local . $dbname . date("N") . '.zip';
+        
+        if ($zip->open($zipFilename, ZIPARCHIVE::CREATE) !== TRUE) {
+            die ("Could not open target file!");
+        }
+        
+        $zip->addFile($backupfile, $filename) or die ("Could not add file: $filename");
+        
+        $zip->close();
+        
+        // Add to zip files array
+        $this->zip_files[] = $zipFilename;
+    }
+    
+    /*
+     * Compress single folder
+     */
+    private function _compressFolder($folder)
+    {
+        // Zip object
+        $zip = new ZipArchive();
+        
+        // Use folder path for file name
+        $filename = $this->local . str_replace('\\', '_', str_replace('/', '_', $folder)) . date("N") . '.zip';
+
+        // Open target
+        if ($zip->open($filename, ZIPARCHIVE::CREATE) !== TRUE) {
+            die ("Could not open target file!");
+        }
+
+        // Initialize an iterator with the folder
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder));
+
+        // Iterate over the directory and add each file found to the archive
+        foreach ($iterator as $key => $value) {
+                $zip->addFile(realpath($key), $key) or die ("Could not add file: $key");
+        }
+
+        // Close and save archive
+        $zip->close();
+            
+        // Add to zip files array
+        $this->zip_files[] = $filename;
     }
     
     /*
      * Send single file to Ubuntu One
      */
-    private function _sendFile($oauth, $dbname, $encpath)
+    private function _sendFile($oauth, $file, $encpath)
     {
-        $backupfile = $this->local . $dbname . date("N") . '.gz';
-        $contents = file_get_contents($backupfile);
+        $contents = file_get_contents($file);
 
-        $put_file_url = 'https://files.one.ubuntu.com/content' . $encpath . '/' . $dbname . date("N") . '.gz';
+        $put_file_url = 'https://files.one.ubuntu.com/content' . $encpath . '/' . basename( $file );
         $oauth->fetch($put_file_url,
                 $contents,
                 OAUTH_HTTP_METHOD_PUT,
