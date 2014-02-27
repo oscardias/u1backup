@@ -3,8 +3,6 @@ u1backup
 
 Files and MySQL Backup script that syncs with Ubuntu One
 
-**Unfortunatelly Ubuntu One is returning 500 where PUTting the file**
-
 How to
 ------
 
