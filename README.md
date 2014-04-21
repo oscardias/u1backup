@@ -1,6 +1,8 @@
 u1backup
 ========
 
+**Ubuntu One file services will [shut down](https://one.ubuntu.com/services/shutdown/ "Ubuntu One: Shutdown notice"). So, there makes no sense maintaining this project up to date. If you want to backup your files try the Dropbox version in [https://github.com/oscardias/dbxbackup_php](https://github.com/oscardias/dbxbackup_php).**
+
 Files and MySQL Backup script that syncs with Ubuntu One
 
 How to
